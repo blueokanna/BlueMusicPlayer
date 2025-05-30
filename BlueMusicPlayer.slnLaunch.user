@@ -1,0 +1,12 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "BlueMusicPlayer.csproj",
+        "Action": "Start",
+        "DebugTarget": "BlueMusicPlayer (Package)"
+      }
+    ]
+  }
+]

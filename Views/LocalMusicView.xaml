@@ -1,0 +1,182 @@
+﻿<UserControl
+    x:Class="BlueMusicPlayer.Views.LocalMusicView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:BlueMusicPlayer.Models"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:media="using:Microsoft.UI.Xaml.Media"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="RootControl">
+
+  <Grid x:Name="LayoutRoot">
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <!-- 搜索 & 操作栏 -->
+    <Border Grid.Row="0"
+            Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+            CornerRadius="16"
+            Padding="20,16"
+            Margin="0,0,0,20">
+      <Border.Shadow>
+        <ThemeShadow/>
+      </Border.Shadow>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <muxc:AutoSuggestBox
+            x:Name="SearchBox"
+            PlaceholderText="Search your music library..."
+            QueryIcon="Find"
+            Text="{Binding SearchQuery, Mode=TwoWay}"
+            Grid.Column="0"
+            Margin="0,0,16,0"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource SystemAccentColorLight2}"
+            CornerRadius="12"
+            Height="44">
+          <muxc:AutoSuggestBox.Resources>
+            <Thickness x:Key="AutoSuggestBoxBorderThemeThickness">2</Thickness>
+          </muxc:AutoSuggestBox.Resources>
+        </muxc:AutoSuggestBox>
+
+        <!-- 添加音乐 -->
+        <Button
+            Style="{ThemeResource AccentButtonStyle}"
+            Command="{Binding BatchAddCommand}"
+            CornerRadius="12"
+            Height="44"
+            Padding="20,8"
+            Grid.Column="1">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <muxc:FontIcon Glyph="&#xE710;" FontSize="16"/>
+            <TextBlock Text="Add Music"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- 音乐列表/卡片区域 -->
+    <ScrollViewer
+        x:Name="LocalMusicScrollViewer"
+        Grid.Row="1"
+        ZoomMode="Disabled"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Disabled">
+      <muxc:ItemsRepeater
+          x:Name="TracksRepeater"
+          x:FieldModifier="public"
+          ItemsSource="{Binding FilteredTracks}"
+          Margin="0,0,0,140">
+        <!-- 默认列表布局 -->
+        <muxc:ItemsRepeater.Layout>
+          <muxc:StackLayout Spacing="12"/>
+        </muxc:ItemsRepeater.Layout>
+
+        <muxc:ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="models:Track">
+            <Border
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="16"
+                Padding="20"
+                BorderBrush="{Binding IsSelected, Converter={StaticResource BoolToAccentBrushConverter}}"
+                BorderThickness="{Binding IsSelected, Converter={StaticResource BoolToThicknessConverter}}">
+              <Border.Shadow>
+                <ThemeShadow/>
+              </Border.Shadow>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 专辑封面 -->
+                <Border Grid.Column="0"
+                        Width="64" Height="64"
+                        CornerRadius="12"
+                        Background="{ThemeResource SystemAccentColorLight1}">
+                  <Border.Shadow>
+                    <ThemeShadow/>
+                  </Border.Shadow>
+                  <Grid>
+                    <Image Source="{Binding AlbumArtUrl}"
+                           Stretch="UniformToFill"
+                           Visibility="{Binding AlbumArtUrl, Converter={StaticResource StringToVisibilityConverter}}"/>
+                    <Border CornerRadius="12"
+                            Background="{ThemeResource SystemAccentColorLight3}"
+                            Visibility="{Binding AlbumArtUrl, Converter={StaticResource InvertedStringToVisibilityConverter}}">
+                      <muxc:FontIcon Glyph="&#xE8D6;"
+                                     FontSize="28"
+                                     Foreground="{ThemeResource SystemAccentColor}"/>
+                    </Border>
+                  </Grid>
+                </Border>
+
+                <!-- 曲目信息 -->
+                <StackPanel Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Margin="20,0">
+                  <TextBlock Text="{Binding Title}"
+                             FontWeight="SemiBold"
+                             FontSize="16"
+                             TextTrimming="CharacterEllipsis"
+                             MaxLines="1"/>
+                  <TextBlock Text="{Binding Artist}"
+                             FontSize="14"
+                             Margin="0,4,0,0"
+                             TextTrimming="CharacterEllipsis"
+                             MaxLines="1"
+                             Visibility="{Binding Artist, Converter={StaticResource StringToVisibilityConverter}}"/>
+                  <TextBlock Text="{Binding Album}"
+                             FontSize="12"
+                             Margin="0,2,0,0"
+                             TextTrimming="CharacterEllipsis"
+                             MaxLines="1"
+                             Visibility="{Binding Album, Converter={StaticResource StringToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <!-- 删除按钮 -->
+                <Button Grid.Column="2"
+                        Command="{Binding DataContext.DeleteTrackCommand, ElementName=LayoutRoot}"
+                        CommandParameter="{Binding}"
+                        Background="DarkRed"
+                        CornerRadius="24"
+                        Width="48" Height="48"
+                        Padding="12,6"
+                        Margin="12,0">
+                  <muxc:FontIcon Glyph="&#xE74D;"
+                                 FontSize="18"
+                                 Foreground="White"/>
+                </Button>
+
+                <!-- 播放按钮 -->
+                <Button Grid.Column="3"
+                        Command="{Binding DataContext.PlayTrackCommand, ElementName=LayoutRoot}"
+                        CommandParameter="{Binding}"
+                        Width="48" Height="48"
+                        CornerRadius="24"
+                        Background="{ThemeResource SystemAccentColor}"
+                        Margin="12,0,0,0">
+                  <muxc:FontIcon Glyph="&#xE768;"
+                                 FontSize="18"
+                                 Foreground="White"/>
+                </Button>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </muxc:ItemsRepeater.ItemTemplate>
+      </muxc:ItemsRepeater>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

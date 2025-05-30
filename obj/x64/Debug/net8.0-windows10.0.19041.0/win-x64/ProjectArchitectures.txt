@@ -1,0 +1,1 @@
+C:\Users\blueo\source\repos\BlueMusicPlayer\BlueMusicPlayer.csproj;x64
